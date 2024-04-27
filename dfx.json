@@ -1,0 +1,37 @@
+{
+  "canisters": {
+    "VotingDAPP_backend": {
+      "main": "src/VotingDAPP_backend/main.mo",
+      "type": "motoko"
+    },
+    "VotingDAPP_frontend": {
+      "dependencies": [
+        "VotingDAPP_backend"
+      ],
+      "source": [
+        "src/VotingDAPP_frontend/dist"
+      ],
+      "type": "assets",
+      "workspace": "VotingDAPP_frontend"
+    },
+    "internet_identity": {
+      "candid": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity.did",
+      "frontend": {},
+      "remote": {
+        "id": {
+          "ic": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        }
+      },
+      "type": "custom",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/latest/download/internet_identity_dev.wasm.gz"
+    }
+  },
+  "defaults": {
+    "build": {
+      "args": "",
+      "packtool": ""
+    }
+  },
+  "output_env_file": ".env",
+  "version": 1
+}
