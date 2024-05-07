@@ -1,30 +1,20 @@
-import { useState } from 'react';
+import React from 'react';
+import FPage from './FPage.jsx';
+import Register from './Register.jsx';
+import AddParticipants from './AddParticipants.jsx';
+import GetParticipant from './GetParticipant.jsx';
 import { VotingDAPP_backend } from 'declarations/VotingDAPP_backend';
 
 function App() {
-  const [greeting, setGreeting] = useState('');
 
-  function handleSubmit(event) {
-    event.preventDefault();
-    const name = event.target.elements.name.value;
-    VotingDAPP_backend.greet(name).then((greeting) => {
-      setGreeting(greeting);
-    });
-    return false;
-  }
 
-  return (
-    <main>
-      <img src="/logo2.svg" alt="DFINITY logo" />
-      <br />
-      <br />
-      <form action="#" onSubmit={handleSubmit}>
-        <label htmlFor="name">Enter your name: &nbsp;</label>
-        <input id="name" alt="Name" type="text" />
-        <button type="submit">Click Me!</button>
-      </form>
-      <section id="greeting">{greeting}</section>
-    </main>
+  return(
+    <>
+      <Register />
+     <FPage />
+     <AddParticipants />
+     <GetParticipant />
+    </>
   );
 }
 

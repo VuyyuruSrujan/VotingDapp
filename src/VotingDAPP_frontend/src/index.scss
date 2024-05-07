@@ -1,6 +1,7 @@
 body {
   font-family: sans-serif;
   font-size: 1.5rem;
+  position: relative;
 }
 
 img {
@@ -34,4 +35,153 @@ button[type="submit"] {
 
 #greeting:empty {
   display: none;
+}
+
+// //////////////////////////////////////////////
+
+// body{
+//   background-color: black;
+//   color: white;
+//   font-family: Arial, sans-serif;
+//   margin: 0;
+//   padding: 0;
+//   display: flex;
+//   justify-content: space-between;
+//   align-items: center;
+//   height: 100vh;
+// }
+// #username,#usrAge,#userMail {
+//   border: none;
+//   border-bottom: 2px solid rgb(225, 205, 205);
+//   background-color: white;
+//   color: rgb(251, 247, 247);
+//   background-color: black;
+//   outline: none;
+// }
+// #userDetailsContainer {
+//   display: flex;
+//   flex-direction: column;
+//   align-items: flex-start;
+//   animation: slideIn 1s forwards;
+//   transform: translateX(-100%);
+//   margin-left: 20px;
+// }
+
+// @keyframes slideIn {
+//   to {
+//       transform: translateX(40%);
+//   }
+// }
+
+// #userDetails {
+//   border: 3px solid rgb(227, 125, 125);
+//   padding: 40px;
+//   border-radius: 20px;
+// }
+
+// label, input {
+//   display:ruby-base;
+//   margin-bottom: 20px;
+// }
+
+// #UserDetbtn {
+//   padding: 10px 20px;
+//   background-color: white;
+//   color: black;
+//   border: none;
+//   border-radius: 5px;
+//   cursor: pointer;
+// }
+
+// #message {
+//   position: absolute;
+//   top: 50%;
+//   right: 30%;
+//   transform: translate(50%, -50%);
+//   font-size: 1.5cm;
+//   color: yellow;
+// }
+
+// #username,#usrAge,#userMail {
+//   border: none;
+//   border-bottom: 2px solid rgb(225, 205, 205);
+//   outline: none;
+// }
+// #userDetails {
+//   margin: 50px;
+// }
+// #UserDetbtn {
+//   --color: #00A97F;
+//   padding: 0.8em 1.7em;
+//   background-color: transparent;
+//   border-radius: .3em;
+//   position: relative;
+//   overflow: hidden;
+//   cursor: pointer;
+//   transition: .5s;
+//   font-weight: 400;
+//   font-size: 17px;
+//   border: 1px solid;
+//   font-family: inherit;
+//   text-transform: uppercase;
+//   color: var(--color);
+//   z-index: 1;
+//   margin: 50px;
+// }
+
+// #UserDetbtn::before, .button::after {
+//   content: '';
+//   display: block;
+//   width: 50px;
+//   height: 50px;
+//   transform: translate(-50%, -50%);
+//   position: absolute;
+//   border-radius: 50%;
+//   z-index: -1;
+//   background-color: var(--color);
+//   transition: 0.35s ease;
+// }
+
+// #UserDetbtn::before {
+//   top: -1em;
+//   left: -1em;
+// }
+
+// #UserDetbtn::after {
+//   left: calc(100% + 1em);
+//   top: calc(100% + 1em);
+// }
+
+// #UserDetbtn:hover::before, .button:hover::after {
+//   height: 410px;
+//   width: 410px;
+// }
+
+// #UserDetbtn:hover {
+//   color: rgb(10, 25, 30);
+// }
+
+// #UserDetbtn:active {
+//   filter: brightness(.8);
+// }
+
+// #ALLproposals{
+//   color: white;
+//   background-color: #00A97F;
+//   margin-top: 0px;
+//   float: right;
+// }
+
+#proposalsBox{
+  width: 350px;
+  border: 2px solid black;
+  margin: 20px;
+  padding: 35px;
+}
+
+#CreateProposal{
+  position: absolute;
+  float: right;
+  top: 150px;
+  left: 500px;
 }
