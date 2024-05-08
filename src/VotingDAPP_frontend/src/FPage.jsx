@@ -151,14 +151,18 @@ function FPage() {
     setSelectedParticipant(participantName);
   }
 
-  function handleSubmit() {
-    if (status === 'notVoted') {
+  async function handleSubmit() {
+    var propId = BigInt(participants.proposalid);
+    console.log(propId)
+    var checking = await VotingDAPP_backend.VotedProposal(propId);
+    console.log("verification result:",checking);
+    if (checking == 'ok') {
       // Count the number of selections for each participant
       const selectionsCount = {};
       participants.Addpart.forEach(participant => {
         selectionsCount[participant] = document.getElementById(participant).checked ? 1 : 0;
       });
-
+  
       // Find the participant with the highest number of selections
       let maxSelections = 0;
       selectedParticipant = null;
@@ -168,14 +172,18 @@ function FPage() {
           selectedParticipant = participant;
         }
       });
-
-      // Print the result to the console
+  
+      // Print the result to the console along with the proposal ID
       console.log("Selected participant with the highest number of selections:", selectedParticipant);
       console.log("Number of selections:", maxSelections);
-
+      console.log("Proposal ID:", participants.proposalid);
+  
       // Update status to 'voted' and disable further voting
       setStatus('voted');
       disableVoting();
+    }
+    else{
+      console.log("you already voted");
     }
   }
 
@@ -192,6 +200,7 @@ function FPage() {
     }, 0);
     return ((document.getElementById(participant).checked ? 1 : 0) / totalVotes) * 100;
   }
+  
 
   return (
     <div>

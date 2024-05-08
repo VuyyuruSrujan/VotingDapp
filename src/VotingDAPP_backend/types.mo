@@ -17,7 +17,6 @@ module {
   public type Participant = {
     Pname:Text;
   };
-
   
   public type ProposalId = Nat64;
   public type ProposalContent = {
