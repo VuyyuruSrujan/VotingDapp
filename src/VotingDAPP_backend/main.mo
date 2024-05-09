@@ -18,7 +18,7 @@ actor {
     type ProposalId = Types.ProposalId;
     type Vote = Types.Vote;
     type AddParticipant= Types.AddParticipant;
-    
+    type VotedId = Types.VotedId;
     
     let goals = Buffer.Buffer<Text>(0);
     let name = "MIC TOKEN";
@@ -267,7 +267,6 @@ actor {
         return true;
     };
 
-
     public shared query func getParticipants() : async [AddParticipant] {
         return Iter.toArray(addparticipant.vals());
     };
@@ -276,19 +275,41 @@ actor {
         return Array.find<AddParticipant>(addparticipant, func x = x.proposalid == proposalid);
     };
      
-
-    let VotedProposals = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
-    public shared ({caller}) func VotedProposal(id : Nat) : async  Text {
-        switch(VotedProposals.get(caller)){
-            case(?id){
-                return "no";
-            };
-            case(null){
-                VotedProposals.put(caller, id);
-                return "ok";
-            };
-        };
-        return "completed";
-    };
     
+
+    // let VotedProposals = HashMap.HashMap<Principal, Nat>(0, Principal.equal, Principal.hash);
+    // public shared ({caller}) func VotedProposal(id : Nat) : async  Text {
+    //     switch(VotedProposals.get(id)){
+    //         case(?id){
+    //             return "no";
+    //         };
+    //         case(null){
+    //             VotedProposals.put(caller, id);
+    //             return "ok";
+    //         };
+    //     };
+    //     return "completed";
+    // };
+    // public query func GetVoted(p : Principal) : async Result<Nat, Text> {
+    //     switch (VotedProposals.get(p)) {
+    //         case (null) {
+    //             return #err("Member does not exist");
+    //         };
+    //         case (?id) {
+    //             return #ok((id));
+    //         };
+    //     };
+    // };
+
+    var votedId:[VotedId] = [];
+    public func VotedIdList(newId : VotedId) : async Bool{
+        votedId :=Array.append<VotedId>(votedId,[newId]);
+        return true;
+    };
+
+    public shared query func getVotedIds() : async [VotedId] {
+        return Iter.toArray(votedId.vals());
+    };
+
+
 };

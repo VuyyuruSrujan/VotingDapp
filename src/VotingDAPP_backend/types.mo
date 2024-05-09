@@ -28,6 +28,10 @@ module {
     Addpart:[Text];
     proposalid:Text;
   };
+
+  public type VotedId = {
+    id:Nat64;
+  };
   public type ProposalStatus = {
     #Open;
     #Accepted;

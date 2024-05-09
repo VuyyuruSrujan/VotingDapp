@@ -152,11 +152,22 @@ function FPage() {
   }
 
   async function handleSubmit() {
-    var propId = BigInt(participants.proposalid);
+    var propId = BigInt((participants.proposalid));
     console.log(propId)
-    var checking = await VotingDAPP_backend.VotedProposal(propId);
-    console.log("verification result:",checking);
-    if (checking == 'ok') {
+    var checking = await VotingDAPP_backend.getVotedIds();
+  console.log("verification result:", checking);
+
+  // Extracting and printing IDs from the verification result array
+  console.log("IDs in verification result:");
+  checking.forEach(item => {
+    console.log(item.id);
+  });
+
+  // Check if the proposal ID is already in the list of voted IDs
+  if (checking.some(item => item.id === propId)) {
+      console.log("you already voted");
+    }
+    else{
       // Count the number of selections for each participant
       const selectionsCount = {};
       participants.Addpart.forEach(participant => {
@@ -177,13 +188,14 @@ function FPage() {
       console.log("Selected participant with the highest number of selections:", selectedParticipant);
       console.log("Number of selections:", maxSelections);
       console.log("Proposal ID:", participants.proposalid);
-  
+      var bewkj = {
+        id:BigInt((participants.proposalid))
+      };
+      var afterPushing = await VotingDAPP_backend.VotedIdList(bewkj);
+      console.log("id pushed to backend",afterPushing);
       // Update status to 'voted' and disable further voting
       setStatus('voted');
       disableVoting();
-    }
-    else{
-      console.log("you already voted");
     }
   }
 
