@@ -39,7 +39,7 @@ button[type="submit"] {
 
 // //////////////////////////////////////////////
 
-// body{
+// #body1{
 //   background-color: black;
 //   color: white;
 //   font-family: Arial, sans-serif;
@@ -164,7 +164,7 @@ button[type="submit"] {
 // #UserDetbtn:active {
 //   filter: brightness(.8);
 // }
-
+///////////////////////////////////////////////////////////////////////////////////////
 // #ALLproposals{
 //   color: white;
 //   background-color: #00A97F;
@@ -172,16 +172,59 @@ button[type="submit"] {
 //   float: right;
 // }
 
-#proposalsBox{
-  width: 350px;
-  border: 2px solid black;
-  margin: 20px;
-  padding: 35px;
+
+#ALLproposals{
+    display: inline-block;
+    background-color: blue;
+    color: white;
 }
 
-#CreateProposal{
-  position: absolute;
-  float: right;
-  top: 150px;
-  left: 500px;
+#proposalsBox{
+    width: 350px;
+    border-right: 2px solid black;
+    border-bottom: 2px solid black;
+    margin: 20px;
+    padding: 35px;
+  }
+  #propContent{
+    background-color: rgb(232, 220, 220);
+  }
+  #CreateProposal{
+    position: absolute;
+    float: right;
+    top: 150px;
+    left: 500px;
+  }
+  #AddpartComp{
+    border: 2px solid black;
+    width: 480px;
+    margin-left: 490px;
+    position: absolute;
+    top: 400px;
+    padding: 10px;
 }
+  #propNote{
+    color: red;
+  }
+  #PartSubmit{
+    display: block;
+    margin: 0 auto;
+    margin-bottom: 15px;
+  }
+  #UserProposals{
+    width: 350px;
+    border-left: 2px solid black;
+    border-bottom: 2px solid black;
+    padding: 35px;
+    position: absolute;
+    top: 0px;
+    right: 0px;
+   
+  }
+  #MyProposals{
+    background-color: blue;
+    color: white;
+  }
+  #CreateProposal{
+    width: 500px;
+  }

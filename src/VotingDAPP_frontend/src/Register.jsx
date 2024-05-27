@@ -40,7 +40,18 @@ function Register(){
                     theme: "colored",
                 });
             }
-        }
+        }else if(name == "" || age == "" || mail == ""){
+            toast.error("fill all the details", {
+                position: "bottom-right",
+                autoClose: 900,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "colored",
+            });
+        };
         
     }
     
@@ -72,14 +83,13 @@ function Register(){
                                 draggable
                                 pauseOnHover
                                 theme="colored"
-                                transition: Bounce
                         />                   
                          
                     </div>
                 </div>
 
                 <div id="message">
-                    Fill your information
+                    Complete Your Profile
                 </div>
             </div>
         </div>

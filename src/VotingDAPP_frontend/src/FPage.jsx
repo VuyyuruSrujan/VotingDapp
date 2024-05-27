@@ -1,11 +1,17 @@
 import { VotingDAPP_backend } from 'declarations/VotingDAPP_backend';
 import { useState, useEffect } from 'react';
+import 'react-toastify/dist/ReactToastify.css';
+import { ToastContainer, toast } from 'react-toastify';
+import AddParticipants from './AddParticipants';
+import GetMyProposals from './GetMyProposals';
 
 function FPage() {
   const [proposals, setProposals] = useState([]);
   const [participants, setParticipants] = useState(null);
   var [selectedParticipant, setSelectedParticipant] = useState(null);
-  const [status, setStatus] = useState('notVoted');
+  const [isDivVisible, setIsDivVisible] = useState(false);
+  const [votingResults, setVotingResults] = useState({});
+
 
   useEffect(() => {
     async function fetchData() {
@@ -22,74 +28,121 @@ function FPage() {
 
   async function CreateProposal() {
     var prop = document.getElementById('propCont').value;
+
+    if(prop == ""){
+      toast.warn('Proposal should not be empty', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
+    } else{
+      toast.success('Successfully created', {
+        position: "top-right",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
     var proptext = {
-      AddGoal: prop
+      AddGoal: prop,
     };
     var result = await VotingDAPP_backend.createProposal(proptext);
     console.log(result);
-  }
+    setIsDivVisible(!isDivVisible);
+  };
+};
 
   function handleSelectParticipant(participantName) {
     setSelectedParticipant(participantName);
   }
 
   async function handleSubmit() {
-    var propId = BigInt((participants.proposalid));
-    console.log(propId)
-    var checking = await VotingDAPP_backend.getVotedIds();
-  console.log("verification result:", checking);
+    var principal = await VotingDAPP_backend.GetPrincipal();
+    var propId = BigInt(participants.proposalid);
+    console.log(propId);
 
-  // Check if the proposal ID is already in the list of voted IDs
-  if (checking.some(item => item.id == propId)) {
-      console.log("you already voted");
-    }
-    else{
-      // Count the number of selections for each participant
-      const selectionsCount = {};
-      participants.Addpart.forEach(participant => {
-        selectionsCount[participant] = document.getElementById(participant).checked ? 1 : 0;
-      });
-  
-      // Find the participant with the highest number of selections
-      let maxSelections = 0;
-      selectedParticipant = null;
-      Object.keys(selectionsCount).forEach(participant => {
-        if (selectionsCount[participant] > maxSelections) {
-          maxSelections = selectionsCount[participant];
-          selectedParticipant = participant;
+    var checking = await VotingDAPP_backend.GetVotedListByPrincipal(principal);
+    console.log("checking", checking);
+
+    // Check if the user has already voted on the current proposal
+    const hasVoted = checking.some(vote => vote.Id === propId);
+
+    if (hasVoted) {
+        toast.warn('You have already voted on this proposal.', {
+            position: "bottom-left",
+            autoClose: 2000,
+            hideProgressBar: false,
+            closeOnClick: true,
+            pauseOnHover: true,
+            draggable: true,
+            progress: undefined,
+            theme: "light",
+            });
+    } else {
+        var VotedData = {
+            caller: principal,
+            Id: propId
+        };
+
+        var push = await VotingDAPP_backend.VotedList(VotedData);
+        console.log("after pushing", push);
+
+        // Print the selected participant directly
+        console.log("Selected participant:", selectedParticipant);
+        console.log("Proposal ID:", participants.proposalid);
+        
+        var voteData ={
+            votingProposalId:BigInt((participants.proposalid)),
+            VotedName:selectedParticipant
         }
-      });
-  
-      // Print the result to the console along with the proposal ID
-      console.log("Selected participant with the highest number of selections:", selectedParticipant);
-      console.log("Number of selections:", maxSelections);
-      console.log("Proposal ID:", participants.proposalid);
-      var bewkj = {
-        id:BigInt((participants.proposalid))
-      };
-      var afterPushing = await VotingDAPP_backend.VotedIdList(bewkj);
-      console.log("id pushed to backend",afterPushing);
-      // Update status to 'voted' and disable further voting
-      setStatus('voted');
-      disableVoting();
+        var FinalResult = await VotingDAPP_backend.finalRes(voteData);
+        console.log(FinalResult);
+        toast.success('voted successfully', {
+        position: "bottom-left",
+        autoClose: 2000,
+        hideProgressBar: false,
+        closeOnClick: true,
+        pauseOnHover: true,
+        draggable: true,
+        progress: undefined,
+        theme: "light",
+        });
     }
-  }
-
-  function disableVoting() {
-    participants.Addpart.forEach(participant => {
-      document.getElementById(participant).disabled = true;
-    });
-  }
-
-  function calculatePercentage(participant) {
-    if (!participants || participants.Addpart.length === 0) return 0;
-    const totalVotes = participants.Addpart.reduce((total, participant) => {
-      return total + (document.getElementById(participant).checked ? 1 : 0);
-    }, 0);
-    return ((document.getElementById(participant).checked ? 1 : 0) / totalVotes) * 100;
-  }
+};
   
 
+  async function EndVoting(id) {
+    var end = await VotingDAPP_backend.GetresultByProposalId(BigInt(id));
+    console.log(end);
+
+    const voteCounts = end.reduce((acc, vote) => {
+        if (acc[vote.VotedName]) {
+            acc[vote.VotedName]++;
+        } else {
+            acc[vote.VotedName] = 1;
+        }
+        return acc;
+    }, {});
+
+    // Determine the name with the highest count
+    const mostVotedName = Object.keys(voteCounts).reduce((a, b) => voteCounts[a] > voteCounts[b] ? a : b);
+
+    setVotingResults(prevResults => ({
+        ...prevResults,
+        [id]: { name: mostVotedName, count: voteCounts[mostVotedName] }
+    }));
+
+    console.log(`Most voted name: ${mostVotedName} with ${voteCounts[mostVotedName]} votes.`);
+    
+};
   return (
     <div>
       <div id='proposalsBox'>
@@ -99,15 +152,20 @@ function FPage() {
             <div>
               {proposals.map((proposal) => {
                 return (
-                  <div key={proposal.id} onClick={() => getProposal(proposal.id)}>
-                    <hr />
+                  <div id='propContent' key={proposal.id} onClick={() => getProposal(proposal.id)}>
                     <h3>Proposal ID:{Number(proposal.id)}</h3>
                     <p>Content: {proposal.content.AddGoal}</p>
                     <p>Creator:{proposal.creator.toString()}</p>
                     <p>Created:{proposal.created}</p>
-                    <p>Votes: {proposal.votes.length}</p>
-                    <p>Vote Score: {proposal.voteScore}</p>
+                    {/* <p>Votes: {proposal.votes.length}</p> */}
+                    {/* <p>Vote Score: {proposal.voteScore}</p> */}
                     <p>Status: {proposal.status ? 'Open' : 'Closed'}</p>
+                    {votingResults[proposal.id] &&
+                      <div>
+                          <p>Most Voted Name: {votingResults[proposal.id].name}</p>
+                          <p>Votes: {votingResults[proposal.id].count}</p>
+                      </div>
+                    }
                   </div>
                 );
               })}
@@ -126,24 +184,36 @@ function FPage() {
                   <div key={participant}>
                     <input type="radio" name="participant" value={participant} id={participant} onChange={() => handleSelectParticipant(participant)} />
                     <label htmlFor={participant}>{participant}</label>
-                    {status === 'voted' ? <span> - {calculatePercentage(participant).toFixed(2)}%</span> : null}
                   </div>
                 ))}
               </ul>
+              <button onClick={handleSubmit} >Submit</button>
             </div>
           </div>
         }
       </div>
       <div id="CreateProposal">
-        <label>Enter your proposal:</label>
+        <p>Create proposal and then add participants to participate in voting</p>
+        <label>Create your new proposal:</label>
         <input type='text' id="propCont" required /><br /><br />
-        <button onClick={CreateProposal}>Create proposal</button>
+        <button onClick={CreateProposal}>Create proposal
+        {/* {isDivVisible ? '' : ''} */}
+        </button>
       </div>
+      {/* {isDivVisible && ( */}
+        <div id='AddpartComp'>
+            <AddParticipants />
+        </div>
+      {/* )} */}
       <div>
-        <button onClick={handleSubmit} disabled={status === 'voted'}>Submit</button>
       </div>
+      <ToastContainer />
+
+      <GetMyProposals />
+
     </div>
   );
 }
+
 
 export default FPage;
