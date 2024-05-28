@@ -9,8 +9,8 @@ function FPage() {
   const [proposals, setProposals] = useState([]);
   const [participants, setParticipants] = useState(null);
   var [selectedParticipant, setSelectedParticipant] = useState(null);
-  const [isDivVisible, setIsDivVisible] = useState(false);
   const [votingResults, setVotingResults] = useState({});
+
 
 
   useEffect(() => {
@@ -24,6 +24,8 @@ function FPage() {
   async function getProposal(id) {
     var result = await VotingDAPP_backend.getParticipantsById(String(id));
     setParticipants(result[0]);
+    setSelectedProposalId(id);
+    setIsModalVisible(true);
   }
 
   async function CreateProposal() {
@@ -56,7 +58,6 @@ function FPage() {
     };
     var result = await VotingDAPP_backend.createProposal(proptext);
     console.log(result);
-    setIsDivVisible(!isDivVisible);
   };
 };
 
@@ -117,7 +118,8 @@ function FPage() {
         });
     }
 };
-  
+
+
 
   async function EndVoting(id) {
     var end = await VotingDAPP_backend.GetresultByProposalId(BigInt(id));
@@ -141,7 +143,7 @@ function FPage() {
     }));
 
     console.log(`Most voted name: ${mostVotedName} with ${voteCounts[mostVotedName]} votes.`);
-    
+
 };
   return (
     <div>
@@ -191,26 +193,30 @@ function FPage() {
             </div>
           </div>
         }
+
       </div>
-      <div id="CreateProposal">
-        <p>Create proposal and then add participants to participate in voting</p>
-        <label>Create your new proposal:</label>
-        <input type='text' id="propCont" required /><br /><br />
-        <button onClick={CreateProposal}>Create proposal
-        {/* {isDivVisible ? '' : ''} */}
-        </button>
-      </div>
-      {/* {isDivVisible && ( */}
-        <div id='AddpartComp'>
-            <AddParticipants />
-        </div>
-      {/* )} */}
-      <div>
-      </div>
+        <div id="CreateProposal">
+          <p id="msg"><b>Note:</b>For voting you can click on any proposal you want to vote and  then continue your voting</p>
+          <p>Create proposal and then add participants to participate in voting</p>
+          <p><b>Note:</b>If you create a proposal then <b>1 MIC Token will Burn</b></p>
+          <label>Create your new proposal:</label>
+          <input type='text' id="propCont" required /><br /><br />
+          <button onClick={CreateProposal}>Create proposal
+          </button>
+        </div>  
+          <div id='AddpartComp'>
+              <AddParticipants />
+          </div>      
+        <GetMyProposals />
+
+<div>
+  {/* <!-- GetMyProposals component --> */}
+  <GetMyProposals />
+</div>
+
+     
+
       <ToastContainer />
-
-      <GetMyProposals />
-
     </div>
   );
 }

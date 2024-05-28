@@ -192,7 +192,7 @@ button[type="submit"] {
   #CreateProposal{
     position: absolute;
     float: right;
-    top: 150px;
+    top: 10px;
     left: 500px;
   }
   #AddpartComp{
@@ -200,8 +200,10 @@ button[type="submit"] {
     width: 480px;
     margin-left: 490px;
     position: absolute;
-    top: 400px;
-    padding: 10px;
+    top: 500px;
+    // padding: 10px;
+    // margin-top: 300px;
+    padding: 20px;
 }
   #propNote{
     color: red;
@@ -228,3 +230,75 @@ button[type="submit"] {
   #CreateProposal{
     width: 500px;
   }
+  #msg{
+    border: 2px solid black;
+    padding: 10px;
+  }
+#message{
+  text-align: center;
+  margin-top: 70px;
+
+}
+#userDetailsContainer{
+  border: 3px solid blue;
+  box-shadow: 7px 7px black;
+  margin-top: 100px;
+  width: 500px;
+  margin-left: 500px;
+  padding: 25px;
+}
+#UserDetbtn{
+  margin-left: 200px;
+  border: 2px solid blue;
+  height: 35px;
+  width: 100px;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+/* Add this CSS to your stylesheet */
+.award-card {
+  position: fixed;
+  bottom: 50%;
+  left: 50%;
+  transform: translate(-50%, 50%);
+  background: gold;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.1);
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.5s ease-in-out;
+}
+
+.award-card.show {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, -50%);
+}
+
+.award-card.hide {
+  opacity: 0;
+  visibility: hidden;
+  transform: translate(-50%, 50%);
+}
+// #NoteProp{
+//   border: 2px solid black;
+//   margin-top: 20px;
+//   padding: 25px;
+// }
+#ConnectBtn{
+  border: 3px solid blue;
+  box-shadow: 5px 5px black;
+  font-size: 40px;
+  margin-left: 950px;
+}

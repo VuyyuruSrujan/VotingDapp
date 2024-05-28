@@ -16,7 +16,10 @@
     "src/VotingDAPP_frontend"
   ],
   "dependencies": {
-    "react-router-dom": "^6.23.0",
+    "@dfinity/auth-client": "^1.3.0",
+    "react-confetti": "^6.1.0",
+    "react-helmet": "^6.1.0",
+    "react-router-dom": "^6.23.1",
     "react-toastify": "^10.0.5"
   }
 }

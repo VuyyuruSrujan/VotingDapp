@@ -45,7 +45,7 @@ actor {
         switch (members.get(caller)) {
             case (null) {
                 members.put(caller, member);
-                ledger.put(caller, 500);
+                ledger.put(caller, 100);
                 return #ok();
             };
             case (?member) {

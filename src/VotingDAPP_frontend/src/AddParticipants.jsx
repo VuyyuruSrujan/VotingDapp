@@ -49,7 +49,7 @@ function AddParticipants() {
 
   return (
     <div>
-      <div>
+      <div id='NoteProp'>
         <p><b>Note</b>:<p id='propNote'>Enter your proposal id and add participants to get voted (enter the proposal id by checking 
         it in the my proposals)</p></p>
         <label>Enter proposal id </label>

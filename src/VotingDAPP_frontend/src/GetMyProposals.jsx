@@ -82,11 +82,6 @@ function GetMyProposals() {
         }
     };
     
-    // async function EndVoting(id){
-    //     var end = await VotingDAPP_backend.GetresultByProposalId(BigInt(id));
-    //     console.log(end);
-    // };
-
     async function EndVoting(id) {
         var end = await VotingDAPP_backend.GetresultByProposalId(BigInt(id));
         console.log(end);
@@ -128,15 +123,18 @@ function GetMyProposals() {
                                         <p>Created:{proposal.created}</p>
                                         <p>Vote Score: {proposal.voteScore}</p>
                                         <p>Status: {proposal.status ? 'Open' : 'Closed'}</p>
+
                                         <button id="EndBtn" onClick={() => EndVoting(Number(proposal.id))}>End This Voting</button>
                                         {votingResults[proposal.id] &&
-                                            <div>
+                                            <div><br />
                                                 <p>Most Voted Name: {votingResults[proposal.id].name}</p>
                                                 <p>Votes: {votingResults[proposal.id].count}</p>
                                             </div>
                                         }
                                     </div>
+                                    
                                 );
+                                
                             })}
                         </div>
                     }
@@ -168,3 +166,4 @@ function GetMyProposals() {
 }
 
 export default GetMyProposals;
+
