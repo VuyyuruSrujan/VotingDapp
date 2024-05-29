@@ -61,6 +61,7 @@ export default function SignUp() {
           <li><b>Note : You can vote for the proposals which are shown in <b>all proposals</b></b></li><br /><br />
           <li>you can create voting and can add participants to participate in voting</li><br /><br />
           <li>And can End the voting so that you will get the result</li><br /><br />
+          <li>A User can vote only one time for a proposal</li><br /><br />
           </ul>
 
 

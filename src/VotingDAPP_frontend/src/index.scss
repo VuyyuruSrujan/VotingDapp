@@ -177,6 +177,7 @@ button[type="submit"] {
     display: inline-block;
     background-color: blue;
     color: white;
+    margin-top: 30px;
 }
 
 #proposalsBox{
@@ -185,6 +186,10 @@ button[type="submit"] {
     border-bottom: 2px solid black;
     margin: 20px;
     padding: 35px;
+    margin: 50px;
+    margin-top: 60px;
+    border-top: 2px solid black;
+    box-shadow: 5px 5px black;
   }
   #propContent{
     background-color: rgb(232, 220, 220);
@@ -192,7 +197,7 @@ button[type="submit"] {
   #CreateProposal{
     position: absolute;
     float: right;
-    top: 10px;
+    top: 60px;
     left: 500px;
   }
   #AddpartComp{
@@ -219,13 +224,14 @@ button[type="submit"] {
     border-bottom: 2px solid black;
     padding: 35px;
     position: absolute;
-    top: 0px;
+    top: 60px;
     right: 0px;
    
   }
   #MyProposals{
     background-color: blue;
     color: white;
+    margin-top: 30px;
   }
   #CreateProposal{
     width: 500px;
@@ -253,7 +259,14 @@ button[type="submit"] {
   height: 35px;
   width: 100px;
 }
-
+button{
+  border: 2px solid blue;
+  box-shadow: 5px 5px black;
+  background-color: bisque;
+  color: rgb(67, 65, 65);
+  height: 40px;
+  width: 150px;
+}
 
 
 
@@ -301,4 +314,65 @@ button[type="submit"] {
   box-shadow: 5px 5px black;
   font-size: 40px;
   margin-left: 950px;
+}
+#BalDiv{
+position: absolute;
+right: 300px;
+border: 3.5px solid blue;
+height: 45px;
+top: -40px;
+text-align: center;
+align-items: center;
+align-content: center;
+border-radius: 10px;
+box-shadow: 5px 5px black;
+padding: 10px;
+}
+
+#modalBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Darken background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px); /* Blur background */
+  z-index: 1000; /* Ensure it is on top of other content */
+}
+
+#TransDiv {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  text-align: center;
+}
+
+
+
+#modalFPageBackground {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5); /* Darken background */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  backdrop-filter: blur(5px); /* Blur background */
+  z-index: 1000; /* Ensure it is on top of other content */
+}
+
+#TransFPageDiv {
+  background: white;
+  padding: 20px;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  width: 300px;
+  text-align: center;
 }

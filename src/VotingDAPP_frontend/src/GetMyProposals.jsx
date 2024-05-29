@@ -18,74 +18,91 @@ function GetMyProposals() {
         fetchProposals();
     }, []);
 
-    async function getProposal(id) {
-        var result = await VotingDAPP_backend.getParticipantsById(String(id));
-        setParticipants(result[0]);
-    }
+    // async function getProposal(id) {
+    //     var result = await VotingDAPP_backend.getParticipantsById(String(id));
+    //     setParticipants(result[0]);
+    //     if (participants == null) {
+    //         alert("no participants for this proposal");
+    //         return;
+    //       }
+    // }
 
-   
-    function handleSelectParticipant(participantName) {
-        setSelectedParticipant(participantName);
-    }
+    // function handleSelectParticipant(participantName) {
+    //     setSelectedParticipant(participantName);
+    // }
 
-    async function handleSubmit() {
-        var principal = await VotingDAPP_backend.GetPrincipal();
-        var propId = BigInt(participants.proposalid);
-        console.log(propId);
+    // async function handleSubmit() {
+    //     var principal = await VotingDAPP_backend.GetPrincipal();
+    //     var propId = BigInt(participants.proposalid);
+    //     console.log(propId);
 
-        var checking = await VotingDAPP_backend.GetVotedListByPrincipal(principal);
-        console.log("checking", checking);
+    //     var checking = await VotingDAPP_backend.GetVotedListByPrincipal(principal);
+    //     console.log("checking", checking);
 
-        // Check if the user has already voted on the current proposal
-        const hasVoted = checking.some(vote => vote.Id === propId);
+    //     // Check if the user has already voted on the current proposal
+    //     const hasVoted = checking.some(vote => vote.Id === propId);
 
-        if (hasVoted) {
-            toast.warn('You have already voted on this proposal.', {
-                position: "bottom-left",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                });
-        } else {
-            var VotedData = {
-                caller: principal,
-                Id: propId
-            };
+    //     if (hasVoted) {
+    //         toast.warn('You have already voted on this proposal.', {
+    //             position: "bottom-left",
+    //             autoClose: 2000,
+    //             hideProgressBar: false,
+    //             closeOnClick: true,
+    //             pauseOnHover: true,
+    //             draggable: true,
+    //             progress: undefined,
+    //             theme: "light",
+    //         });
+    //     } else {
+    //         var VotedData = {
+    //             caller: principal,
+    //             Id: propId
+    //         };
 
-            var push = await VotingDAPP_backend.VotedList(VotedData);
-            console.log("after pushing", push);
+    //         var push = await VotingDAPP_backend.VotedList(VotedData);
+    //         console.log("after pushing", push);
 
-            // Print the selected participant directly
-            console.log("Selected participant:", selectedParticipant);
-            console.log("Proposal ID:", participants.proposalid);
-            
-            var voteData ={
-                votingProposalId:BigInt((participants.proposalid)),
-                VotedName:selectedParticipant
-            }
-            var FinalResult = await VotingDAPP_backend.finalRes(voteData);
-            console.log(FinalResult);
-            toast.warn('voted successfully', {
-                position: "bottom-left",
-                autoClose: 2000,
-                hideProgressBar: false,
-                closeOnClick: true,
-                pauseOnHover: true,
-                draggable: true,
-                progress: undefined,
-                theme: "light",
-                });
-        }
-    };
-    
+    //         // Print the selected participant directly
+    //         console.log("Selected participant:", selectedParticipant);
+    //         console.log("Proposal ID:", participants.proposalid);
+
+    //         var voteData = {
+    //             votingProposalId: BigInt((participants.proposalid)),
+    //             VotedName: selectedParticipant
+    //         }
+    //         var FinalResult = await VotingDAPP_backend.finalRes(voteData);
+    //         console.log(FinalResult);
+    //         toast.success('Voted successfully', {
+    //             position: "bottom-left",
+    //             autoClose: 2000,
+    //             hideProgressBar: false,
+    //             closeOnClick: true,
+    //             pauseOnHover: true,
+    //             draggable: true,
+    //             progress: undefined,
+    //             theme: "light",
+    //         });
+    //     }
+    // }
+
     async function EndVoting(id) {
         var end = await VotingDAPP_backend.GetresultByProposalId(BigInt(id));
         console.log(end);
-    
+
+        if (!end || end.length == "") {
+            toast.warn('No votes found for this proposal.', {
+                position: "top-right",
+                autoClose: 2000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+            return;
+        }
+
         const voteCounts = end.reduce((acc, vote) => {
             if (acc[vote.VotedName]) {
                 acc[vote.VotedName]++;
@@ -94,25 +111,24 @@ function GetMyProposals() {
             }
             return acc;
         }, {});
-    
+
         // Determine the name with the highest count
         const mostVotedName = Object.keys(voteCounts).reduce((a, b) => voteCounts[a] > voteCounts[b] ? a : b);
-    
+
         setVotingResults(prevResults => ({
             ...prevResults,
             [id]: { name: mostVotedName, count: voteCounts[mostVotedName] }
         }));
 
         console.log(`Most voted name: ${mostVotedName} with ${voteCounts[mostVotedName]} votes.`);
-    };
-    
+    }
 
     return (
         <div>
             <div id='UserProposals'>
                 <h1 id="MyProposals">My proposals</h1>
                 <div id="UsProposals">
-                    {proposals.length === 0 ? null :
+                    {proposals.length === 0 ? <p>No proposals found.</p> :
                         <div>
                             {proposals.map((proposal) => {
                                 return (
@@ -132,38 +148,37 @@ function GetMyProposals() {
                                             </div>
                                         }
                                     </div>
-                                    
                                 );
-                                
                             })}
                         </div>
                     }
                 </div>
             </div>
-
+{/* 
             <div>
-                {participants === null ? null :
+                {participants === null ? <p>Select a proposal to see participants.</p> :
                     <div>
                         <div key={participants.proposalid}>
                             <h5>Proposal ID: {participants.proposalid}</h5>
                             <h5>Participants in proposal:</h5>
-                            <ul>
-                                {participants.Addpart.map(participant => (
-                                    <div key={participant}>
-                                        <input type="radio" name="participant" value={participant} id={participant} onChange={() => handleSelectParticipant(participant)} />
-                                        <label htmlFor={participant}>{participant}</label>
-                                    </div>
-                                ))}
-                            </ul>
+                            {participants.Addpart.length === 0 ? <p>No participants found.</p> :
+                                <ul>
+                                    {participants.Addpart.map(participant => (
+                                        <div key={participant}>
+                                            <input type="radio" name="participant" value={participant} id={participant} onChange={() => handleSelectParticipant(participant)} />
+                                            <label htmlFor={participant}>{participant}</label>
+                                        </div>
+                                    ))}
+                                </ul>
+                            }
                             <button onClick={handleSubmit}>Submit</button>
                         </div>
                     </div>
                 }
-            </div>
+            </div> */}
             <ToastContainer />
         </div>
     );
 }
 
 export default GetMyProposals;
-
