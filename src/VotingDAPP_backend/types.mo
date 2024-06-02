@@ -12,8 +12,12 @@ module {
     name : Text;
     age : Nat;
     mail:Text;
+    creator:Principal;
   };
 
+public type savePrin = {
+    caller : Principal;
+};
 public type VotedData = {
   caller:Principal;
   Id:Nat64;
@@ -25,6 +29,7 @@ public type VotedData = {
   public type ProposalId = Nat64;
   public type ProposalContent = {
     AddGoal : Text;
+    creator:Principal;
   };
 
   public type AddParticipant = {

@@ -1,72 +1,59 @@
-import React from 'react';
-import { Helmet } from 'react-helmet';
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { AuthClient } from "@dfinity/auth-client";
-import { toast, ToastContainer } from 'react-toastify';
-import "react-toastify/dist/ReactToastify.css";
-import { useNavigate } from 'react-router-dom'; // Import useNavigate hook
+import { useNavigate } from 'react-router-dom';
 
-export default function SignUp() {
-   const navigate = useNavigate(); // Initialize navigate function
+export default function VotePage() {
+   const [identity, setIdentity] = useState(null);
+   const navigate = useNavigate(); 
 
    async function handleConnect() {
-      const authClient = await AuthClient.create();
+      var authClient = await AuthClient.create();
       authClient.login({
          maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
          identityProvider: "https://identity.ic0.app/#authorize",
          onSuccess: async () => {
-            toast.success('Logged In Successfully.', {
-               position: "top-right",
-               autoClose: 5000,
-               hideProgressBar: false,
-               closeOnClick: true,
-               pauseOnHover: true,
-               draggable: true,
-               progress: undefined,
-               theme: "light",
-            });
-            // Navigate to '/First' when successfully logged in
+            const identity = await authClient.getIdentity();
+            setIdentity(identity);
             navigate('/check-verification');
          },
       });
    }
 
+   useEffect(() => {
+      async function init() {
+         var authClient = await AuthClient.create();
+         if (await authClient.isAuthenticated()) {
+            const identity = await authClient.getIdentity();
+            setIdentity(identity);
+         }
+      }
+      init();
+   }, []);
+   
    return (
       <>
-         <Helmet>
-            <title>Student_results_ICP</title>
-            {/* Add other meta tags as needed */}
-         </Helmet>
-
-         <ToastContainer
-            position="top-right"
-            autoClose={5000}
-            hideProgressBar={false}
-            newestOnTop={false}
-            closeOnClick
-            rtl={false}
-            pauseOnFocusLoss
-            draggable
-            pauseOnHover
-            theme="light"
-         />
-
          <div>
-            <h1></h1>
-            <button onClick={handleConnect} id='ConnectBtn'>Connect</button>
+            <button id="ConnectBtn"
+               onClick={handleConnect}
+               style={{
+                  cursor: "pointer",
+                  marginTop: "32px"
+               }}
+            >
+               Connect
+            </button>
          </div>
          <div>
-         <ul>
-          <li> <b>Connect to Internet Identity</b> to Cast your vote </li><br /><br />
-          <li><b>Note : You can vote for the proposals which are shown in <b>all proposals</b></b></li><br /><br />
-          <li>you can create voting and can add participants to participate in voting</li><br /><br />
-          <li>And can End the voting so that you will get the result</li><br /><br />
-          <li>A User can vote only one time for a proposal</li><br /><br />
-          </ul>
-
-
+            <ul>
+               <li>Create your profile and get <b>100 MIC</b> Tokens.</li><br /><br />
+               <li>With that <b>MIC TOKENS</b> you can create proposal for voting then every one can vote for your proposal.</li><br /><br />
+               <li>For creating each proposal it will burn <b>1 MIC TOKEN</b></li><br /><br />
+               <li>You can <b>transfer</b> the <b>MIC TOKENS</b> for anyone by using <b>Principal Id's</b></li><br /><br />
+               <li>To cast your vote you can click on any proposal in all proposals and can cast your vote</li><br /><br />
+               <li>You can only vote once for a proposal</li>
+            </ul>
          </div>
+         
       </>
    );
 }
-

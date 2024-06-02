@@ -3,39 +3,87 @@ import { VotingDAPP_backend } from 'declarations/VotingDAPP_backend';
 import { Principal } from '@dfinity/principal';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
+import { AuthClient } from "@dfinity/auth-client";
 
 export default function Balance() {
-    const [balance, setBalance] = useState(null);
-    const [principal, setPrincipal] = useState('');
+    const [balance, setBalance] = useState('');
     const [showModal, setShowModal] = useState(false);
+    const [identity, setIdentity] = useState(null);
+
+    async function handleConnect() {
+        const authClient = await AuthClient.create();
+        if (identity !== null) {
+            authClient.logout();
+            setIdentity(null);
+            toast.info('Logged Out Successfully.', {
+                position: "top-right",
+                autoClose: 5000,
+                hideProgressBar: false,
+                closeOnClick: true,
+                pauseOnHover: true,
+                draggable: true,
+                progress: undefined,
+                theme: "light",
+            });
+        } else {
+            authClient.login({
+                maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
+                identityProvider: "https://identity.ic0.app/#authorize",
+                onSuccess: async () => {
+                    setIdentity(await authClient.getIdentity());
+                    toast.success('Logged In Successfully.', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
+                },
+            });
+        }
+    }
+
+    useEffect(() => {
+        async function init() {
+            const authClient = await AuthClient.create();
+            if (await authClient.isAuthenticated()) {
+                setIdentity(await authClient.getIdentity());
+            }
+        }
+        init();
+    }, []);
 
     useEffect(() => {
         async function fetchBalance() {
-            try {
-                var principal = await VotingDAPP_backend.GetPrincipal();
-                setPrincipal(principal.toString()); // Convert principal to string
-                var balance = await VotingDAPP_backend.balanceOf(principal);
-                setBalance(balance);
-                console.log(principal);
-            } catch (error) {
-                console.error("Error fetching balance or principal:", error);
+            if (identity) {
+                try {
+                    const myPrincipal = identity.getPrincipal();
+                    const balance = await VotingDAPP_backend.balanceOf(myPrincipal);
+                    setBalance(balance);
+                } catch (error) {
+                    console.error("Error fetching balance or principal:", error);
+                }
             }
         }
         fetchBalance();
-    }, []);
+    }, [identity]);
 
     async function TransferTokens() {
-        try {
-            var SenderPrincipal = Principal.fromText(principal); // Validate sender principal
-            var ReceiverPrincipal = Principal.fromText(document.getElementById('ReceiverPrincipal').value); // Validate receiver principal
-            var NumberOfTokens = parseFloat(document.getElementById('SendingTokens').value); // Ensure tokens are in correct format
+        // try {
+            const senderPrincipal = identity.getPrincipal();
+            const receiverPrincipal = Principal.fromText(document.getElementById('ReceiverPrincipal').value);
+            const numberOfTokens = parseFloat(document.getElementById('SendingTokens').value);
 
-            if (isNaN(NumberOfTokens) || NumberOfTokens <= 0) {
+            if (isNaN(numberOfTokens) || numberOfTokens <= 0) {
                 throw new Error("Invalid number of tokens.");
             }
 
-            var transfer = await VotingDAPP_backend.transfer(SenderPrincipal, ReceiverPrincipal, NumberOfTokens);
+            const transfer = await VotingDAPP_backend.transfer(senderPrincipal, receiverPrincipal, numberOfTokens);
             console.log(transfer);
+            if('ok' in transfer){
             toast.success('Transfer successful', {
                 position: "top-right",
                 autoClose: 2000,
@@ -46,9 +94,8 @@ export default function Balance() {
                 progress: undefined,
                 theme: "light",
             });
-        } catch (error) {
-            console.error("Error during transfer:", error);
-            toast.error(`Error during transfer: ${error.message}`, {
+        }else if(transfer.err){ 
+            toast.error( transfer.err, {
                 position: "top-right",
                 autoClose: 2000,
                 hideProgressBar: false,
@@ -59,6 +106,20 @@ export default function Balance() {
                 theme: "light",
             });
         }
+           
+        // } catch (error) {
+        //     console.error("Error during transfer:", error);
+        //     toast.error(`Error during transfer: ${error.message}`, {
+        //         position: "top-right",
+        //         autoClose: 2000,
+        //         hideProgressBar: false,
+        //         closeOnClick: true,
+        //         pauseOnHover: true,
+        //         draggable: true,
+        //         progress: undefined,
+        //         theme: "light",
+        //     });
+        // }
     }
 
     function handleBackgroundClick(event) {
@@ -78,7 +139,7 @@ export default function Balance() {
                     <div id='TransDiv'>
                         <p>Transfer your tokens to anyone by using their principal</p>
                         <label>My Principal:</label>
-                        <input type='text' id='senderPrincipal' value={principal} readOnly /><br /><br />
+                        <input type='text' id='senderPrincipal' value={identity ? identity.getPrincipal().toText() : 'Loading...'} readOnly /><br /><br />
 
                         <label>Receiver's principal:</label>
                         <input type='text' id='ReceiverPrincipal' /><br /><br />
@@ -95,4 +156,3 @@ export default function Balance() {
         </div>
     );
 }
-

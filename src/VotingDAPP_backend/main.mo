@@ -20,10 +20,18 @@ actor {
     type AddParticipant= Types.AddParticipant;
     type VotedData = Types.VotedData;
     type FinalResult = Types.FinalResult;
+    type savePrin = Types.savePrin;
 
     let goals = Buffer.Buffer<Text>(0);
     let name = "MIC TOKEN";
     let participants = Buffer.Buffer<Text>(0);
+
+        let samplePrin = HashMap.HashMap<Principal, savePrin>(0, Principal.equal, Principal.hash);
+    public shared ({ caller }) func Addprin(prin : savePrin) : async Result<(), Text> {
+        samplePrin.put(caller,prin);
+        return #ok();
+    };
+
     public shared query func getName() : async Text {
         return name;
     };
@@ -42,10 +50,11 @@ actor {
     let members = HashMap.HashMap<Principal, Member>(0, Principal.equal, Principal.hash);
     
     public shared ({ caller }) func addMember(member : Member) : async Result<(), Text> {
-        switch (members.get(caller)) {
+        switch (members.get(member.creator)) {
             case (null) {
-                members.put(caller, member);
-                ledger.put(caller, 100);
+                members.put(member.creator, member);
+                ledger.put(member.creator, 100);
+                // ledger.put(caller, 100);
                 return #ok();
             };
             case (?member) {
@@ -54,9 +63,15 @@ actor {
         };
     };
     
+    public shared func removeAllMembers() : async Result<(), Text> {
+        for (key in members.keys()) {
+            members.delete(key);
+        };
+        return #ok();
+    };
 
     public shared ({ caller }) func updateMember(member : Member) : async Result<(), Text> {
-        var isExist = members.get(caller);
+        var isExist = members.get(member.creator);
         switch (isExist) {
             case (null) {
                 return #err("Member does not exist");
@@ -68,13 +83,13 @@ actor {
         };
     };
 
-    public shared ({ caller }) func removeMember() : async Result<(), Text> {
-        switch (members.get(caller)) {
+    public shared ({ caller }) func removeMember(User:Principal) : async Result<(), Text> {
+        switch (members.get(User)) {
             case (null) {
                 return #err("Member does not exist");
             };
             case (?member) {
-                members.delete(caller);
+                members.delete(User);
                 return #ok();
             };
         };
@@ -159,12 +174,12 @@ actor {
     let proposals = HashMap.HashMap<ProposalId, Proposal>(0, Nat64.equal, Nat64.toNat32);
 
     public shared ({ caller }) func createProposal(content : ProposalContent) : async Result<ProposalId, Text> {
-        switch (members.get(caller)) {
+        switch (members.get(content.creator)) {
             case (null) {
                 return #err("The caller is not a member - cannot create a proposal");
             };
             case (?member) {
-                let balance = Option.get(ledger.get(caller), 0);
+                let balance = Option.get(ledger.get(content.creator), 0);
                 if (balance < 1) {
                     return #err("The caller does not have enough tokens to create a proposal");
                 };
@@ -172,7 +187,7 @@ actor {
                 let proposal : Proposal = {
                     id = nextProposalId;
                     content = content;
-                    creator = caller;
+                    creator = content.creator;
                     created = Time.now();
                     executed = null;
                     voteScore = 0;
@@ -180,7 +195,7 @@ actor {
                 };
                 proposals.put(nextProposalId, proposal);
                 nextProposalId += 1;
-                _burn(caller, 1);
+                _burn(content.creator, 1);
                 return #ok(nextProposalId - 1);
             };
         };
@@ -194,12 +209,13 @@ actor {
         return Iter.toArray(proposals.vals());
     };
 
-    public query func getProposalsByPrincipal(caller:Principal): async [Proposal] {
+    public query func getProposalsByPrincipal(creator:Principal): async [Proposal] {
         return Iter.toArray(
             Iter.filter<Proposal>(
                 proposals.vals(),
                 func (proposal: Proposal): Bool {
-                    proposal.creator == ?(caller)
+                    // proposal.creator == ?(creator)
+                    Principal.equal(proposal.creator, creator);
                 }
             )
         );
@@ -221,10 +237,10 @@ actor {
     };
 
     /////////////////////Voting verification
-    public shared ({ caller }) func GetPrincipal() : async Principal {
-        return caller;
+    public shared (msg) func GetPrincipal() : async Principal {
+        return msg.caller;
     };
-    
+
     var votedvotes:[VotedData] = [];
     
     public func VotedList(voteddata : VotedData) : async Bool{

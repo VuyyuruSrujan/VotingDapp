@@ -259,7 +259,7 @@ button[type="submit"] {
   height: 35px;
   width: 100px;
 }
-button{
+#FPageSubmitBtn,#EndBtn,#CreateProposalBtn,#PartSubmit{
   border: 2px solid blue;
   box-shadow: 5px 5px black;
   background-color: bisque;
@@ -267,9 +267,6 @@ button{
   height: 40px;
   width: 150px;
 }
-
-
-
 
 
 

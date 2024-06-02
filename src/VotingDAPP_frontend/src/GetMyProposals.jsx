@@ -2,97 +2,23 @@ import { useState, useEffect } from 'react';
 import { VotingDAPP_backend } from 'declarations/VotingDAPP_backend';
 import 'react-toastify/dist/ReactToastify.css';
 import { ToastContainer, toast } from 'react-toastify';
+import { AuthClient } from "@dfinity/auth-client";
 
 function GetMyProposals() {
     const [proposals, setProposals] = useState([]);
     const [participants, setParticipants] = useState(null);
     const [selectedParticipant, setSelectedParticipant] = useState(null);
     const [votingResults, setVotingResults] = useState({});
+    const [identity, setIdentity] = useState(null);
 
-    useEffect(() => {
-        async function fetchProposals() {
-            var principal = await VotingDAPP_backend.GetPrincipal();
-            var result = await VotingDAPP_backend.getProposalsByPrincipal(principal);
-            setProposals(result);
-        }
-        fetchProposals();
-    }, []);
-
-    // async function getProposal(id) {
-    //     var result = await VotingDAPP_backend.getParticipantsById(String(id));
-    //     setParticipants(result[0]);
-    //     if (participants == null) {
-    //         alert("no participants for this proposal");
-    //         return;
-    //       }
-    // }
-
-    // function handleSelectParticipant(participantName) {
-    //     setSelectedParticipant(participantName);
-    // }
-
-    // async function handleSubmit() {
-    //     var principal = await VotingDAPP_backend.GetPrincipal();
-    //     var propId = BigInt(participants.proposalid);
-    //     console.log(propId);
-
-    //     var checking = await VotingDAPP_backend.GetVotedListByPrincipal(principal);
-    //     console.log("checking", checking);
-
-    //     // Check if the user has already voted on the current proposal
-    //     const hasVoted = checking.some(vote => vote.Id === propId);
-
-    //     if (hasVoted) {
-    //         toast.warn('You have already voted on this proposal.', {
-    //             position: "bottom-left",
-    //             autoClose: 2000,
-    //             hideProgressBar: false,
-    //             closeOnClick: true,
-    //             pauseOnHover: true,
-    //             draggable: true,
-    //             progress: undefined,
-    //             theme: "light",
-    //         });
-    //     } else {
-    //         var VotedData = {
-    //             caller: principal,
-    //             Id: propId
-    //         };
-
-    //         var push = await VotingDAPP_backend.VotedList(VotedData);
-    //         console.log("after pushing", push);
-
-    //         // Print the selected participant directly
-    //         console.log("Selected participant:", selectedParticipant);
-    //         console.log("Proposal ID:", participants.proposalid);
-
-    //         var voteData = {
-    //             votingProposalId: BigInt((participants.proposalid)),
-    //             VotedName: selectedParticipant
-    //         }
-    //         var FinalResult = await VotingDAPP_backend.finalRes(voteData);
-    //         console.log(FinalResult);
-    //         toast.success('Voted successfully', {
-    //             position: "bottom-left",
-    //             autoClose: 2000,
-    //             hideProgressBar: false,
-    //             closeOnClick: true,
-    //             pauseOnHover: true,
-    //             draggable: true,
-    //             progress: undefined,
-    //             theme: "light",
-    //         });
-    //     }
-    // }
-
-    async function EndVoting(id) {
-        var end = await VotingDAPP_backend.GetresultByProposalId(BigInt(id));
-        console.log(end);
-
-        if (!end || end.length == "") {
-            toast.warn('No votes found for this proposal.', {
+    async function handleConnect() {
+        const authClient = await AuthClient.create();
+        if (identity !== null) {
+            authClient.logout();
+            setIdentity(null);
+            toast.info('Logged Out Successfully.', {
                 position: "top-right",
-                autoClose: 2000,
+                autoClose: 5000,
                 hideProgressBar: false,
                 closeOnClick: true,
                 pauseOnHover: true,
@@ -100,27 +26,86 @@ function GetMyProposals() {
                 progress: undefined,
                 theme: "light",
             });
-            return;
+        } else {
+            authClient.login({
+                maxTimeToLive: BigInt(7 * 24 * 60 * 60 * 1000 * 1000 * 1000),
+                identityProvider: "https://identity.ic0.app/#authorize",
+                onSuccess: async () => {
+                    setIdentity(await authClient.getIdentity());
+                    toast.success('Logged In Successfully.', {
+                        position: "top-right",
+                        autoClose: 5000,
+                        hideProgressBar: false,
+                        closeOnClick: true,
+                        pauseOnHover: true,
+                        draggable: true,
+                        progress: undefined,
+                        theme: "light",
+                    });
+                },
+            });
         }
+    }
 
-        const voteCounts = end.reduce((acc, vote) => {
-            if (acc[vote.VotedName]) {
-                acc[vote.VotedName]++;
-            } else {
-                acc[vote.VotedName] = 1;
+    useEffect(() => {
+        async function init() {
+            const authClient = await AuthClient.create();
+            if (await authClient.isAuthenticated()) {
+                setIdentity(await authClient.getIdentity());
             }
-            return acc;
-        }, {});
+        }
+        init();
+    }, []);
 
-        // Determine the name with the highest count
-        const mostVotedName = Object.keys(voteCounts).reduce((a, b) => voteCounts[a] > voteCounts[b] ? a : b);
+    useEffect(() => {
+        async function fetchProposals() {
+            if (identity) {
+                try {
+                    const MyProposal = identity.getPrincipal();
+                    const result = await VotingDAPP_backend.getProposalsByPrincipal(MyProposal);
+                    setProposals(result);
+                    console.log("Only my proposals", result);
+                } catch (error) {
+                    console.error("Error fetching proposals:", error);
+                }
+            }
+        }
+        fetchProposals();
+    }, [identity]);
 
-        setVotingResults(prevResults => ({
-            ...prevResults,
-            [id]: { name: mostVotedName, count: voteCounts[mostVotedName] }
-        }));
+    async function EndVoting(id) {
+        try {
+            const end = await VotingDAPP_backend.GetresultByProposalId(BigInt(id));
+            if (!end || end.length === 0) {
+                toast.warn('No votes found for this proposal.', {
+                    position: "top-right",
+                    autoClose: 2000,
+                    hideProgressBar: false,
+                    closeOnClick: true,
+                    pauseOnHover: true,
+                    draggable: true,
+                    progress: undefined,
+                    theme: "light",
+                });
+                return;
+            }
 
-        console.log(`Most voted name: ${mostVotedName} with ${voteCounts[mostVotedName]} votes.`);
+            const voteCounts = end.reduce((acc, vote) => {
+                if (acc[vote.VotedName]) {
+                    acc[vote.VotedName]++;
+                } else {
+                    acc[vote.VotedName] = 1;
+                }
+                return acc;
+            }, {});
+
+            setVotingResults(prevResults => ({
+                ...prevResults,
+                [id]: voteCounts
+            }));
+        } catch (error) {
+            console.error("Error ending voting:", error);
+        }
     }
 
     return (
@@ -132,7 +117,7 @@ function GetMyProposals() {
                         <div>
                             {proposals.map((proposal) => {
                                 return (
-                                    <div id='MyPropContent' key={proposal.id} onClick={() => getProposal(proposal.id)}>
+                                    <div id='MyPropContent' key={proposal.id}>
                                         <h3>Proposal ID:{Number(proposal.id)}</h3>
                                         <p>Content: {proposal.content.AddGoal}</p>
                                         <p>Creator:{proposal.creator.toString()}</p>
@@ -140,11 +125,18 @@ function GetMyProposals() {
                                         <p>Vote Score: {proposal.voteScore}</p>
                                         <p>Status: {proposal.status ? 'Open' : 'Closed'}</p>
 
-                                        <button id="EndBtn" onClick={() => EndVoting(Number(proposal.id))}>End This Voting</button>
+                                        <button id="EndBtn" onClick={(e) => {
+                                            e.stopPropagation(); // Prevent click event from bubbling up to the proposal div
+                                            EndVoting(Number(proposal.id));
+                                        }}>End This Voting</button>
                                         {votingResults[proposal.id] &&
                                             <div><br />
-                                                <p>Most Voted Name: {votingResults[proposal.id].name}</p>
-                                                <p>Votes: {votingResults[proposal.id].count}</p>
+                                                <h4>Voting Results:</h4>
+                                                <ul>
+                                                    {Object.entries(votingResults[proposal.id]).map(([name, count]) => (
+                                                        <li key={name}>{name}: {count} votes</li>
+                                                    ))}
+                                                </ul>
                                             </div>
                                         }
                                     </div>
@@ -154,28 +146,6 @@ function GetMyProposals() {
                     }
                 </div>
             </div>
-{/* 
-            <div>
-                {participants === null ? <p>Select a proposal to see participants.</p> :
-                    <div>
-                        <div key={participants.proposalid}>
-                            <h5>Proposal ID: {participants.proposalid}</h5>
-                            <h5>Participants in proposal:</h5>
-                            {participants.Addpart.length === 0 ? <p>No participants found.</p> :
-                                <ul>
-                                    {participants.Addpart.map(participant => (
-                                        <div key={participant}>
-                                            <input type="radio" name="participant" value={participant} id={participant} onChange={() => handleSelectParticipant(participant)} />
-                                            <label htmlFor={participant}>{participant}</label>
-                                        </div>
-                                    ))}
-                                </ul>
-                            }
-                            <button onClick={handleSubmit}>Submit</button>
-                        </div>
-                    </div>
-                }
-            </div> */}
             <ToastContainer />
         </div>
     );
